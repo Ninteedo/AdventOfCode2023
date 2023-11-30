@@ -3,43 +3,54 @@ package utility
 import scala.collection.mutable
 
 trait SearchNode[T <: SearchNode[T]] {
-  val orderingValue: Int = {
-    val result: Int = calculateOrderingValue()
+  lazy val orderingValue: Int = {
+    val result: Int = calculateOrderingValue
     if (getParent != null && result > getParent.orderingValue)
-      sys.error(s"invalid child ordering value $result, parent has ${getParent.orderingValue}\n${pathString()}")
+      sys.error(s"invalid child ordering value $result, parent has ${getParent.orderingValue}\n$pathString")
     result
   }
 
-  def calculateOrderingValue(): Int
+  def calculateOrderingValue: Int
 
-  def descendents(): Iterable[T]
+  lazy val descendents: Iterable[T]
 
-  def atGoal: Boolean
+  lazy val atGoal: Boolean
 
-  def getParent: T
+  lazy val getParent: T
 
-  def getResult: Int
+  lazy val getResult: Int
 
-  def isDuplicateOf(other: SearchNode[T]): Boolean = false
+  def isDuplicateOf(other: SearchNode[T]): Boolean = orderingValue == other.orderingValue
 
-  def filterDuplicates: Boolean = false
+  override def equals(obj: Any): Boolean = obj match {
+    case otherNode: SearchNode[T] => isDuplicateOf(otherNode)
+    case _ => false
+  }
+
+  override def hashCode(): Int = orderingValue
+
+  val filterDuplicates: Boolean = false
 
   def bestFirstSearch(): Option[SearchNode[T]] = {
     val frontier: mutable.PriorityQueue[SearchNode[T]] = mutable.PriorityQueue(this)(Ordering.by(_.orderingValue))
+    val visited = mutable.Set[SearchNode[T]]()
 
     while (frontier.nonEmpty) {
       val node: SearchNode[T] = frontier.dequeue()
       if (node.atGoal) return Some(node)
 
-      var nodesToAdd = node.descendents()
-      if (filterDuplicates) nodesToAdd = nodesToAdd.filter(newNode => frontier.forall(!newNode.isDuplicateOf(_)))
+      var nodesToAdd = node.descendents
+      if (filterDuplicates) {
+        visited.add(node)
+        nodesToAdd = nodesToAdd.filterNot(visited.contains(_))
+      }
       nodesToAdd.foreach(frontier.enqueue(_))
     }
 
     None
   }
 
-  def pathString(): String = {
+  lazy val pathString: String = {
     var result: List[String] = List()
     var curr: SearchNode[T] = this
     while (curr != null) {
@@ -50,6 +61,6 @@ trait SearchNode[T <: SearchNode[T]] {
   }
 
   override def toString: String = {
-    s"TimeNode(order=$orderingValue, result=$getResult)"
+    s"SearchNode(order=$orderingValue, result=$getResult)"
   }
 }
