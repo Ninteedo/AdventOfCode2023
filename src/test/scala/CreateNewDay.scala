@@ -10,7 +10,7 @@ object CreateNewDay {
   def main(args: Array[String]): Unit = {
     val currentDate = LocalDate.now()
     if (currentDate.getYear <= 2023 && currentDate.getMonthValue < 12) {
-      println("It's not December 2023 yet.")
+      println("🎄 It's not December 2023 yet.")
       return
     }
     val afterDecember: Boolean = currentDate.getYear > 2023
@@ -18,9 +18,10 @@ object CreateNewDay {
     val inputDirPath = Paths.get("input")
     if (!Files.exists(inputDirPath)) Files.createDirectory(inputDirPath)
 
-    val day = (1 to 25).find { day =>
+    val maxDay = if (afterDecember) 25 else math.min(25, currentDate.getDayOfMonth)
+    val day = (1 to maxDay).find { day =>
       val filePath = Paths.get(s"input/${dayString(day)}.txt")
-      !Files.exists(filePath) && (currentDate.getDayOfMonth >= day || afterDecember)
+      !Files.exists(filePath)
     }
 
     day match {
@@ -28,7 +29,7 @@ object CreateNewDay {
         createDayScript(day)
         downloadInput(2023, day)
       case None =>
-        println("All input for December 2023 have been downloaded, or it's too early to download next input.")
+        println("👍 All input for December 2023 have been downloaded, or it's too early to download next input.")
     }
   }
 
@@ -41,7 +42,7 @@ object CreateNewDay {
       connection.setRequestMethod("GET")
       val cookieFilePath = Paths.get(".cookie")
       if (!Files.exists(cookieFilePath)) {
-        throw new FileNotFoundException("Could not find .cookie file for session cookie.")
+        throw new FileNotFoundException("❌ Could not find .cookie file for session cookie.")
       }
       val sessionCookie = Files.readString(cookieFilePath).stripSuffix("\n")
       connection.setRequestProperty("Cookie", s"session=$sessionCookie")
@@ -50,14 +51,16 @@ object CreateNewDay {
       try {
         in = connection.getInputStream
         Files.copy(in, filePath, StandardCopyOption.REPLACE_EXISTING)
-        println(s"Downloaded input for day $day.")
+        println(s"⏬ Downloaded input for day $day.")
       } catch {
         case e: Exception =>
-          println(s"Error during downloading the file for day $day: ${e.getMessage}")
+          println(s"❌ Error during downloading the file for day $day: ${e.getMessage}")
       } finally {
         in.close()
         connection.disconnect()
       }
+    } else {
+      println(s"👍 Input file already exists for day $day")
     }
   }
 
@@ -68,7 +71,9 @@ object CreateNewDay {
       var fileContent = Files.readString(templatePath, StandardCharsets.UTF_8)
       fileContent = fileContent.replace("DayTemplate", s"Day${dayString(day)}")
       Files.writeString(dayPath, fileContent, StandardCharsets.UTF_8)
-      println(s"Created script for day $day.")
+      println(s"📜 Created script for day $day. ($dayPath)")
+    } else {
+      println(s"👍 Script file already exists for day $day. ($dayPath)")
     }
   }
 }
