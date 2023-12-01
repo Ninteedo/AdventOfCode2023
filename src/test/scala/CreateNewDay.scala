@@ -4,7 +4,7 @@ import java.io.{FileNotFoundException, InputStream}
 import java.net.{HttpURLConnection, URL}
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths, StandardCopyOption}
-import java.time.LocalDate
+import java.time.{LocalDate, LocalTime}
 
 object CreateNewDay {
   def main(args: Array[String]): Unit = {
@@ -18,7 +18,8 @@ object CreateNewDay {
     val inputDirPath = Paths.get("input")
     if (!Files.exists(inputDirPath)) Files.createDirectory(inputDirPath)
 
-    val maxDay = if (afterDecember) 25 else math.min(25, currentDate.getDayOfMonth)
+    val maxDay = if (afterDecember) 25 else
+      math.min(25, currentDate.getDayOfMonth - (if (LocalTime.now().getHour < 5) 1 else 0))
     val day = (1 to maxDay).find { day =>
       val filePath = Paths.get(s"input/${dayString(day)}.txt")
       !Files.exists(filePath)
