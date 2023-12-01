@@ -70,6 +70,7 @@ object CreateNewDay {
       val templatePath = Paths.get("src/main/scala/utility/DayTemplate.scala")
       var fileContent = Files.readString(templatePath, StandardCharsets.UTF_8)
       fileContent = fileContent.replace("DayTemplate", s"Day${dayString(day)}")
+        .replace("package utility", "package days\n\nimport utility.*")
       Files.writeString(dayPath, fileContent, StandardCharsets.UTF_8)
       println(s"📜 Created script for day $day. ($dayPath)")
     } else {
