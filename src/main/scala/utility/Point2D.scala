@@ -22,7 +22,7 @@ class Point2D(val x: Int, val y: Int) {
 
   override def equals(other: Any): Boolean = other match {
     case that: Point2D =>
-        x == that.x &&
+      x == that.x &&
         y == that.y
     case _ => false
   }
@@ -38,6 +38,11 @@ object Point2D {
   val zero: Point2D = new Point2D(0, 0)
 
   val directions: LazyList[Point2D] = LazyList(xVec(1), xVec(-1), yVec(1), yVec(-1))
+
+  val adjacents: LazyList[Point2D] = LazyList(
+    Point2D(-1, -1), Point2D(-1, 0), Point2D(-1, 1), Point2D(0, -1),
+    Point2D(0, 1), Point2D(1, -1), Point2D(1, 0), Point2D(1, 1)
+  )
 
   def xVec(x: Int): Point2D = new Point2D(x, 0)
 
