@@ -69,31 +69,8 @@ class Day10 extends IDay {
     }
   }
 
-  def part1(pipeGrid: Grid2D[Pipe]): Int = {
-    val startPos: Point2D = pipeGrid.indexWhere(_ == StartPipe()).get
-    val startConnections: Set[Direction] = Direction.values.filter(dir => {
-      val newPos = dir.adjustPosition(startPos)
-      pipeGrid.contains(newPos) && pipeGrid.at(newPos).connects(dir.opposite)
-    }).toSet
-    pipeGrid.at(startPos).asInstanceOf[StartPipe].setDirections(startConnections)
-
-    @tailrec
-    def traversePipes(curr: Point2D, prevDir: Direction, steps: Int): Int = {
-      pipeGrid.at(curr) match {
-        case StartPipe() => steps
-        case prevPipe => {
-          prevPipe.connections.filter(_ != prevDir.opposite).head match {
-            case dir => traversePipes(dir.adjustPosition(curr), dir, steps + 1)
-          }
-        }
-      }
-    }
-
-    (traversePipes(startConnections.head.adjustPosition(startPos), startConnections.head, 1) + 1) / 2
-  }
-
-  def part2(pipeGrid: Grid2D[Pipe]): Int = {
-    val mainLoop: collection.mutable.Set[Point2D] = collection.mutable.Set()
+  def getMainPipe(pipeGrid: Grid2D[Pipe]): Set[Point2D] = {
+    var mainLoop: Set[Point2D] = Set()
 
     val startPos: Point2D = pipeGrid.indexWhere(_ == StartPipe()).get
     val startConnections: Set[Direction] = Direction.values.filter(dir => {
@@ -104,7 +81,7 @@ class Day10 extends IDay {
 
     @tailrec
     def traversePipes(curr: Point2D, prevDir: Direction): Unit = {
-      mainLoop.add(curr)
+      mainLoop += curr
       pipeGrid.at(curr) match {
         case StartPipe() =>
         case prevPipe => prevPipe.connections.filter(_ != prevDir.opposite).head match {
@@ -114,6 +91,13 @@ class Day10 extends IDay {
     }
 
     traversePipes(startConnections.head.adjustPosition(startPos), startConnections.head)
+    mainLoop
+  }
+
+  def part1(pipeGrid: Grid2D[Pipe]): Int = getMainPipe(pipeGrid).size / 2
+
+  def part2(pipeGrid: Grid2D[Pipe]): Int = {
+    val mainLoop: Set[Point2D] = getMainPipe(pipeGrid)
 
     // (isOpen, isMajor)
     def superGridPoint(pos: Point2D): Boolean = {
@@ -156,7 +140,7 @@ class Day10 extends IDay {
       (0 to (pipeGrid.colCount - 1) * 2).map(x => superGridPoint(Point2D(x, y))).toArray
     ).toArray)
 
-    val connectsToEdge: collection.mutable.Map[Point2D, Boolean] = collection.mutable.Map()
+    var connectsToEdge: collection.mutable.Map[Point2D, Boolean] = collection.mutable.Map()
 
     def connectsToEdgeRegionCheck(pos: Point2D): Boolean = {
       val currRegion: collection.mutable.Set[Point2D] = collection.mutable.Set()
@@ -190,7 +174,7 @@ class Day10 extends IDay {
           }
         })
       }
-      false
+      finalise(pos, false)
     }
 
     def checkEnclosed(pos: Point2D): Boolean = connectsToEdge.get(pos) match {
@@ -199,9 +183,9 @@ class Day10 extends IDay {
     }
 
     (0 until pipeGrid.rowCount).flatMap(y => {
-      (0 until pipeGrid.colCount).filter(x => {
-        checkEnclosed(Point2D(x * 2, y * 2))
+      (0 until pipeGrid.colCount).map(x => {
+        Point2D(x * 2, y * 2)
       })
-    }).length
+    }).count(checkEnclosed)
   }
 }

@@ -33,7 +33,7 @@ class Grid2D[T: ClassTag](val entries: Array[Array[T]]) {
 object Grid2D {
   def from2DCharArray[T: ClassTag](input: String, f: Char => T): Grid2D[T] = {
     val lines = input.split("\n")
-    val entries = lines.map(_.map(f).toArray)
+    val entries = lines.map(_.strip.map(f).toArray)
     new Grid2D(entries)
   }
 }
