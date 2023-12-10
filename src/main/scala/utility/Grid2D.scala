@@ -20,5 +20,20 @@ class Grid2D[T: ClassTag](val entries: Array[Array[T]]) {
     contains(row1, col1) && contains(row2, col2) && (row1 != row2 || col1 != col2) && (row1 - row2).abs <= 1 && (col1 - col2).abs <= 1
   def adjacent(pos1: Point2D, pos2: Point2D): Boolean = adjacent(pos1.y, pos1.x, pos2.y, pos2.x)
 
+  def indexWhere(f: T => Boolean): Option[Point2D] = {
+    entries.zipWithIndex.find { case (row, rowNum) => row.indexWhere(f) >= 0 } match {
+      case Some((row, rowNum)) => Some(Point2D(row.indexWhere(f), rowNum))
+      case None => None
+    }
+  }
+
   override def toString: String = entries.map(_.mkString("[", ", ", "]")).mkString("\n")
+}
+
+object Grid2D {
+  def from2DCharArray[T: ClassTag](input: String, f: Char => T): Grid2D[T] = {
+    val lines = input.split("\n")
+    val entries = lines.map(_.map(f).toArray)
+    new Grid2D(entries)
+  }
 }
