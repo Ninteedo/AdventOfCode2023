@@ -8,30 +8,33 @@ class Day11 extends IDay {
     (part1(galaxiesGrid), part2(galaxiesGrid))
   }
 
-  def part1(grid: Grid2D[Boolean]): Long = totalGalaxyDistances(grid, 2L)
+  def part1(grid: Grid2D[Boolean]): Long = totalGalaxyDistances(grid, 2)
 
-  def part2(grid: Grid2D[Boolean]): Long = totalGalaxyDistances(grid, 1000000L)
+  def part2(grid: Grid2D[Boolean]): Long = totalGalaxyDistances(grid, 1000000)
 
-  def totalGalaxyDistances(galaxyGrid: Grid2D[Boolean], expansionDist: Long): Long = {
-    val expandedCols = galaxyGrid.entriesByColumn.zipWithIndex.filter((column, i) => !column.contains(true)).map(_._2).toSet
-    val expandedRows = galaxyGrid.entries.zipWithIndex.filter((row, i) => !row.contains(true)).map(_._2).toSet
+  def totalGalaxyDistances(galaxyGrid: Grid2D[Boolean], expansionDist: Int): Long = {
+    def getExpandedIndices(entries: Array[Array[Boolean]]): Set[Int] = {
+      entries.zipWithIndex.collect {
+        case (entry, index) if !entry.contains(true) => index
+      }.toSet
+    }
 
-    val galaxies: List[Point2D] = galaxyGrid.indicesWhere(_ == true)
-    galaxies.indices.flatMap(i =>
-      (i + 1 until galaxies.length).map(j => {
-        val galaxy1 = galaxies(i)
-        val galaxy2 = galaxies(j)
+    val expandedColIndices = getExpandedIndices(galaxyGrid.entriesByColumn)
+    val expandedRowIndices = getExpandedIndices(galaxyGrid.entries)
 
-        val coveredCols = (math.min(galaxy1.x, galaxy2.x) until math.max(galaxy1.x, galaxy2.x)).map(x =>
-          if (expandedCols.contains(x)) expansionDist
-          else 1
-        ).sum
-        val coveredRows = (math.min(galaxy1.y, galaxy2.y) until math.max(galaxy1.y, galaxy2.y)).map(y =>
-          if (expandedRows.contains(y)) expansionDist
-          else 1
-        ).sum
-        coveredCols + coveredRows
-      })
-    ).sum
+    def expandPosition(pos: Point2D): Point2D = {
+      val expandX = expandedColIndices.count(_ < pos.x) * (expansionDist - 1)
+      val expandY = expandedRowIndices.count(_ < pos.y) * (expansionDist - 1)
+      Point2D(pos.x + expandX, pos.y + expandY)
+    }
+
+    val galaxies = galaxyGrid.indicesWhere(_ == true).map(expandPosition)
+
+    (for {
+      i <- galaxies.indices
+      j <- i + 1 until galaxies.length
+      galaxy1 = galaxies(i)
+      galaxy2 = galaxies(j)
+    } yield (galaxy1.x.toLong - galaxy2.x).abs + (galaxy1.y.toLong - galaxy2.y).abs).sum
   }
 }
