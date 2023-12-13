@@ -26,12 +26,14 @@ class Grid2D[T: ClassTag](val entries: Array[Array[T]]) {
       case None => None
     }
   }
-  
+
   def indicesWhere(f: T => Boolean): List[Point2D] = {
     entries.zipWithIndex.flatMap {
       case (row, rowNum) => row.indices.filter(colNum => f(at(rowNum, colNum))).map(colNum => Point2D(colNum, rowNum))
     }.toList
   }
+
+  def transpose: Grid2D[T] = new Grid2D(entriesByColumn)
 
   override def toString: String = entries.map(_.mkString("[", ", ", "]")).mkString("\n")
 }
