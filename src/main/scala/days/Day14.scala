@@ -3,7 +3,7 @@ package days
 import utility.*
 
 class Day14 extends IDay {
-  type RockGrid = Grid2D[Option[Boolean]]
+  type RockGrid = Grid2D[Option[Boolean]]  // movable: Some(true), static: Some(false), empty: None
 
   override def execute(input: String): (Int, Int) = {
     val grid: RockGrid = Grid2D.from2DCharArray(input, {
@@ -14,20 +14,6 @@ class Day14 extends IDay {
     })
 
     (part1(grid), part2(grid))
-  }
-
-  def moveRock(grid: RockGrid, rockPos: Point2D, direction: Point2D): RockGrid = {
-    if (!grid.at(rockPos).contains(true)) return grid
-
-    var currPos = rockPos
-    var prevPos: Option[Point2D] = None
-
-    while (grid.contains(currPos) && (prevPos.isEmpty || grid.at(currPos).isEmpty)) {
-      prevPos = Some(currPos)
-      currPos = currPos + direction
-    }
-
-    grid.updated(rockPos, None).updated(prevPos.get, Some(true))
   }
 
   def part1(grid: RockGrid): Int = evaluateRocks(tiltInDirection(grid, Point2D(0, -1)))
@@ -63,6 +49,20 @@ class Day14 extends IDay {
   }
 
   def tiltInDirection(grid: RockGrid, dir: Point2D): RockGrid = {
+    def moveRock(grid: RockGrid, rockPos: Point2D, direction: Point2D): RockGrid = {
+      if (!grid.at(rockPos).contains(true)) return grid
+
+      var currPos = rockPos
+      var prevPos: Option[Point2D] = None
+
+      while (grid.contains(currPos) && (prevPos.isEmpty || grid.at(currPos).isEmpty)) {
+        prevPos = Some(currPos)
+        currPos = currPos + direction
+      }
+
+      grid.updated(rockPos, None).updated(prevPos.get, Some(true))
+    }
+
     val (width, height) = (grid.colCount, grid.rowCount)
     val iterator: Seq[Point2D] = dir match {
       case Point2D(0, -1) => for (y <- 0 until height; x <- 0 until width) yield Point2D(x, y)
