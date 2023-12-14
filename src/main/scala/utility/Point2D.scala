@@ -1,6 +1,6 @@
 package utility
 
-class Point2D(val x: Int, val y: Int) {
+case class Point2D(val x: Int, val y: Int) {
   def +(other: Point2D) = new Point2D(x + other.x, y + other.y)
 
   def -(other: Point2D) = new Point2D(x - other.x, y - other.y)

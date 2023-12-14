@@ -35,7 +35,25 @@ class Grid2D[T: ClassTag](val entries: Array[Array[T]]) {
 
   def transpose: Grid2D[T] = new Grid2D(entriesByColumn)
 
+  def updated(pos: Point2D, value: T): Grid2D[T] = {
+    val newEntries = entries.clone()
+    newEntries(pos.y) = newEntries(pos.y).clone()
+    newEntries(pos.y)(pos.x) = value
+    new Grid2D(newEntries)
+  }
+
+  override def equals(obj: Any): Boolean = obj match {
+    case other: Grid2D[T] => entries.zip(other.entries).forall((a, b) => a sameElements b)
+    case _ => false
+  }
+
+  lazy val hashCodeCache: Int = entries.hashCode()
+
+  override def hashCode(): Int = hashCodeCache
+
   override def toString: String = entries.map(_.mkString("[", ", ", "]")).mkString("\n")
+
+  def toGridString(f: T => String): String = entries.map(_.map(f).mkString("")).mkString("\n")
 }
 
 object Grid2D {
