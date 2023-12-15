@@ -19,20 +19,13 @@ class Day15 extends IDay {
       val list = boxes.getOrElse(hash, List.empty)
 
       if (lensString.endsWith("-")) {
-        if (label + "-" != lensString) throw new Exception("Lens string does not match")
-
-        val updated = list.filterNot(_._1 == label)
-        boxes.put(hash, updated)
+        boxes.put(hash, list.filterNot(_._1 == label))
       } else {
         val lensStrength = lensString.last.asDigit
 
-        if (label + "=" + lensStrength != lensString) throw new Exception("Lens string does not match")
-
         if (list.exists(_._1 == label)) {
-          val updated = list.updated(list.indexWhere(_._1 == label), (label, lensStrength))
-          boxes.put(hash, updated)
+          boxes.put(hash, list.updated(list.indexWhere(_._1 == label), (label, lensStrength)))
         } else {
-          val updated = list :+ (label, lensStrength)
           boxes.put(hash, list :+ (label, lensStrength))
         }
       }
@@ -52,9 +45,7 @@ class Day15 extends IDay {
   def getAsciiValue(c: Char): Int = c.toInt
 
   def calculateHashCode(s: String): Int = {
-    def addCharToHash(hash: Int, c: Char): Int = {
-      ((hash + getAsciiValue(c)) * 17) % 256
-    }
+    def addCharToHash(hash: Int, c: Char): Int = ((hash + getAsciiValue(c)) * 17) % 256
 
     s.foldLeft(0)(addCharToHash)
   }
