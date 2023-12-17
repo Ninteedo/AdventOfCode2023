@@ -5,18 +5,18 @@ import scala.collection.mutable
 trait SearchNode[T <: SearchNode[T]] {
   lazy val orderingValue: Int = {
     val result: Int = calculateOrderingValue
-    if (getParent != null && result > getParent.orderingValue)
-      sys.error(s"invalid child ordering value $result, parent has ${getParent.orderingValue}\n$pathString")
+    if (strict && getParent.isDefined && result > getParent.get.orderingValue)
+      sys.error(s"invalid child ordering value $result, parent has ${getParent.get.orderingValue}\n$pathString")
     result
   }
 
   def calculateOrderingValue: Int
 
-  lazy val descendents: Iterable[T]
+  def descendents: Iterable[T]
 
   lazy val atGoal: Boolean
 
-  lazy val getParent: T
+  lazy val getParent: Option[T]
 
   lazy val getResult: Int
 
@@ -31,6 +31,8 @@ trait SearchNode[T <: SearchNode[T]] {
 
   val filterDuplicates: Boolean = false
 
+  val strict: Boolean = true
+
   def bestFirstSearch(): Option[SearchNode[T]] = {
     val frontier: mutable.PriorityQueue[SearchNode[T]] = mutable.PriorityQueue(this)(Ordering.by(_.orderingValue))
     val visited = mutable.Set[SearchNode[T]]()
@@ -39,12 +41,14 @@ trait SearchNode[T <: SearchNode[T]] {
       val node: SearchNode[T] = frontier.dequeue()
       if (node.atGoal) return Some(node)
 
-      var nodesToAdd = node.descendents
-      if (filterDuplicates) {
-        visited.add(node)
-        nodesToAdd = nodesToAdd.filterNot(visited.contains(_))
+      if (!(filterDuplicates && visited.contains(node))) {
+        var nodesToAdd = node.descendents
+        if (filterDuplicates) {
+          visited.add(node)
+          nodesToAdd = nodesToAdd.filterNot(visited.contains(_))
+        }
+        nodesToAdd.foreach(frontier.enqueue(_))
       }
-      nodesToAdd.foreach(frontier.enqueue(_))
     }
 
     None
@@ -52,15 +56,15 @@ trait SearchNode[T <: SearchNode[T]] {
 
   lazy val pathString: String = {
     var result: List[String] = List()
-    var curr: SearchNode[T] = this
-    while (curr != null) {
-      result = curr.toString :: result
-      curr = curr.getParent
+    var curr: Option[SearchNode[T]] = Some(this)
+    while (curr.isDefined) {
+      result = curr.get.toString :: result
+      curr = curr.get.getParent
     }
     result.mkString("\n")
   }
 
   override def toString: String = {
-    s"SearchNode(order=$orderingValue, result=$getResult)"
+    s"SearchNode(order=$calculateOrderingValue, result=$getResult)"
   }
 }
