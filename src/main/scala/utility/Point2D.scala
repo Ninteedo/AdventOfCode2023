@@ -1,6 +1,6 @@
 package utility
 
-case class Point2D(val x: Int, val y: Int) {
+case class Point2D(x: Int, y: Int) {
   def +(other: Point2D) = new Point2D(x + other.x, y + other.y)
 
   def -(other: Point2D) = new Point2D(x - other.x, y - other.y)
@@ -17,6 +17,8 @@ case class Point2D(val x: Int, val y: Int) {
 
   def inArea(topLeft: Point2D, bottomRight: Point2D): Boolean =
     topLeft.x <= x && x <= bottomRight.x && topLeft.y <= y && y <= bottomRight.y
+
+  def transpose: Point2D = Point2D(y, x)
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[Point2D]
 
@@ -47,4 +49,29 @@ object Point2D {
   def xVec(x: Int): Point2D = new Point2D(x, 0)
 
   def yVec(y: Int): Point2D = new Point2D(0, y)
+}
+
+enum Direction {
+  case North, East, South, West
+
+  def adjustPosition(pos: Point2D): Point2D = this match {
+    case North => Point2D(pos.x, pos.y - 1)
+    case East => Point2D(pos.x + 1, pos.y)
+    case South => Point2D(pos.x, pos.y + 1)
+    case West => Point2D(pos.x - 1, pos.y)
+  }
+
+  def opposite: Direction = this match {
+    case North => South
+    case East => West
+    case South => North
+    case West => East
+  }
+
+  def toPoint: Point2D = this match {
+    case North => Point2D(0, -1)
+    case East => Point2D(1, 0)
+    case South => Point2D(0, 1)
+    case West => Point2D(-1, 0)
+  }
 }

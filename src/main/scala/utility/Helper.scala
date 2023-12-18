@@ -40,4 +40,6 @@ object Helper {
   def countAppearances[A](l: Iterable[A], item: A): Int = l.count(_ == item)
 
   def isUnique[A](l: Iterable[A]): Boolean = l.toList.distinct.length == l.size
+
+  def boolToInt(b: Boolean): Int = if (b) 1 else 0
 }
