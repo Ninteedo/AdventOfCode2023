@@ -1,6 +1,7 @@
 package days
 
 import utility.*
+import utility.Helper.lcm
 
 class Day08 extends IDay {
   override def execute(input: String): (Int, Long) = {
@@ -52,11 +53,4 @@ class Day08 extends IDay {
     case 'L' => connections(position)._1
     case 'R' => connections(position)._2
   }
-
-  def gcd(a: Long, b: Long): Long = b match {
-    case 0 => a
-    case b => gcd(b, a % b)
-  }
-
-  def lcm(a: Long, b: Long): Long = a * b / gcd(a, b)
 }

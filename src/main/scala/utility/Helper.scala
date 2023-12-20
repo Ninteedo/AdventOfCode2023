@@ -1,5 +1,6 @@
 package utility
 
+import scala.annotation.tailrec
 import scala.jdk.StreamConverters.StreamHasToScala
 import scala.util.matching.Regex
 
@@ -42,4 +43,12 @@ object Helper {
   def isUnique[A](l: Iterable[A]): Boolean = l.toList.distinct.length == l.size
 
   def boolToInt(b: Boolean): Int = if (b) 1 else 0
+
+  @tailrec
+  def gcd(a: Long, b: Long): Long = b match {
+    case 0 => a
+    case b => gcd(b, a % b)
+  }
+
+  def lcm(a: Long, b: Long): Long = a * b / gcd(a, b)
 }
