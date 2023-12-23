@@ -2,6 +2,8 @@ package days
 
 import utility.*
 
+import scala.annotation.tailrec
+
 class Day22 extends IDay {
   override def execute(input: String): (Any, Any) = {
     val bricks: Array[Brick] = Helper.readLines(input, Brick.read).toArray
@@ -68,7 +70,8 @@ class Day22 extends IDay {
   }
 
   case class Simulation(bricks: Array[Brick], collidable: Map[Int, List[Int]]) {
-    def stabilise: Simulation = {
+    @tailrec
+    final def stabilise: Simulation = {
       def moveBrickDown(otherBricks: Array[Brick], index: Int): Brick = {
         val brick = bricks(index)
         val fallDistance = collidable(index).map(bricks) match {
@@ -80,7 +83,7 @@ class Day22 extends IDay {
 
       val newBricks = bricks.indices.map(i => moveBrickDown(bricks, i))
       val res = Simulation(newBricks.toArray, collidable)
-      if (!(res.bricks sameElements bricks)) res.stabilise else res
+      if (res.bricks sameElements bricks) res else res.stabilise
     }
 
     lazy val supported: Map[Int, Array[Int]] = bricks.indices
