@@ -6,3 +6,5 @@ lazy val root = (project in file("."))
   .settings(
     name := "AdventOfCode2023"
   )
+
+libraryDependencies += "org.scalanlp" %% "breeze" % "2.1.0"
